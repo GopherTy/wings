@@ -6,9 +6,9 @@
 
 Administrator Table 
 
-| id   | password | user_name |
-| ---- | -------- | --------- |
-|      |          |           |
+| ID   | User | Password | IP Address | Last Login |
+| ---- | ---- | -------- | ---------- | ---------- |
+|      |      |          |            |            |
 
-### Core Feature 
+### Core  
 
