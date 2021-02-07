@@ -6,5 +6,5 @@ import "google.golang.org/grpc"
 type IModule interface {
 	Name() string
 	Init() error
-	GRPCFeatureRegistry(*grpc.Server)
+	Registry(*grpc.Server)
 }

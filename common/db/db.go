@@ -6,8 +6,8 @@ import (
 	_ "github.com/go-sql-driver/mysql" // 模块注册导入数据库驱动
 	"github.com/go-xorm/xorm"
 
-	"github.com/gopherty/blog/common/conf"
-	"github.com/gopherty/blog/common/logger"
+	"github.com/gopherty/wings/common/conf"
+	"github.com/gopherty/wings/common/logger"
 )
 
 var db *xorm.Engine

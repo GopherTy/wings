@@ -9,7 +9,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"gopkg.in/yaml.v2"
 
-	"github.com/gopherty/blog/utils"
+	"github.com/gopherty/wings/utils"
 )
 
 var instance *Configuration

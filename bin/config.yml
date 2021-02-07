@@ -8,11 +8,10 @@ DB:
   Cached: 200
 Server:
   Address: :10000
-  Release: false
   CertFile: ""
   KeyFile: ""
 Logger: 
   Level: debug
   Encoding: console
   Development: false
-  LogsPath: "wings.log"
+  LogsPath: ""

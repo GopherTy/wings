@@ -1,4 +1,4 @@
-module github.com/gopherty/blog
+module github.com/gopherty/wings
 
 go 1.15
 
@@ -16,6 +16,7 @@ require (
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/genproto v0.0.0-20210204154452-deb828366460 // indirect
 	google.golang.org/grpc v1.35.0
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.2.8
 	xorm.io/builder v0.3.9 // indirect
 	xorm.io/core v0.7.3 // indirect

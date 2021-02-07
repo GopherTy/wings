@@ -4,11 +4,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gopherty/blog/common/conf"
-	"github.com/gopherty/blog/utils"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/gopherty/wings/common/conf"
+	"github.com/gopherty/wings/utils"
 )
 
 var instance *zap.Logger
