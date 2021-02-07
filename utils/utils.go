@@ -2,7 +2,6 @@ package utils
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -42,14 +41,14 @@ func IsDir(src string) bool {
 }
 
 // BasePath  获取项目的绝对路径
-func BasePath() (basePath string) {
+func BasePath() (basePath string, err error) {
 	path, err := exec.LookPath(os.Args[0])
 	if err != nil {
-		log.Fatalln(err)
+		return
 	}
 	path, err = filepath.Abs(path)
 	if err != nil {
-		log.Fatalln(err)
+		return
 	}
 	basePath = filepath.Dir(path)
 	return

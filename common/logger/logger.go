@@ -6,6 +6,7 @@ import (
 
 	"github.com/gopherty/blog/common/conf"
 	"github.com/gopherty/blog/utils"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -96,7 +97,7 @@ func (Register) Regist() (err error) {
 	defer zapLogger.Sync()
 
 	instance = zapLogger
-	instance.Info("Init logger success")
+	instance.Info("init logger success")
 	return
 }
 

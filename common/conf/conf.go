@@ -2,19 +2,19 @@ package conf
 
 import (
 	"errors"
-	"flag"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/go-jsonnet"
-	"github.com/gopherty/blog/utils"
 	jsoniter "github.com/json-iterator/go"
 	"gopkg.in/yaml.v2"
+
+	"github.com/gopherty/blog/utils"
 )
 
-var instance = &Configuration{}
+var instance *Configuration
 
-// Register configuration register
+// Register configuration register.
 type Register struct {
 }
 
@@ -40,9 +40,6 @@ type DB struct {
 	MaxIdleConns int `json:"MaxIdleConns" yaml:"MaxIdleConns" jsonnet:"MaxIdleConns"`
 	// 缓存大小
 	Cached int `json:"Cached" yaml:"Cached" jsonnet:"Cached"`
-
-	// 是否创建用户相关表
-	UserManageDisable bool `json:"UserManageDisable" yaml:"UserManageDisable" jsonnet:"UserManageDisable"`
 }
 
 // Server http服务器相关配置
@@ -75,14 +72,18 @@ func (Register) Name() string {
 
 // Regist 注册配置模块
 func (Register) Regist() (err error) {
-	path := flag.String("c", "cnf.json", "use -c to specify config file path")
-	flag.Parse()
-	_, err = instance.loader(*path)
+	instance = &Configuration{}
+	path, err := utils.BasePath()
+	if err != nil {
+		return
+	}
+	path = filepath.Join(path, "config.yml")
+	_, err = instance.loader(path)
 	if err != nil {
 		return
 	}
 	if instance == nil {
-		err = errors.New("configuration is nil,regist failed. ")
+		err = errors.New("configuration load failed")
 	}
 	return
 }
@@ -127,7 +128,7 @@ func (c *Configuration) loader(path string) (b []byte, err error) {
 			return
 		}
 	default:
-		err = errors.New("Not support this file format")
+		err = errors.New("format not support")
 	}
 	return
 }

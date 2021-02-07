@@ -3,11 +3,12 @@ package cmd
 import (
 	"log"
 
+	"github.com/spf13/cobra"
+
 	"github.com/gopherty/blog/common"
 	"github.com/gopherty/blog/common/conf"
 	"github.com/gopherty/blog/common/db"
 	"github.com/gopherty/blog/common/logger"
-	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

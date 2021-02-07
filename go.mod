@@ -3,7 +3,7 @@ module github.com/gopherty/blog
 go 1.15
 
 require (
-	github.com/go-sql-driver/mysql v1.5.0 // indirect
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-xorm/xorm v0.7.9
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-jsonnet v0.17.0

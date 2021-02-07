@@ -3,7 +3,9 @@ package db
 import (
 	"errors"
 
+	_ "github.com/go-sql-driver/mysql" // 模块注册导入数据库驱动
 	"github.com/go-xorm/xorm"
+
 	"github.com/gopherty/blog/common/conf"
 	"github.com/gopherty/blog/common/logger"
 )
@@ -39,9 +41,7 @@ func (Register) Regist() (err error) {
 	engine.SetMaxIdleConns(cnf.DB.MaxIdleConns)
 
 	// 是否开启 SQL 日志
-	if cnf.DB.ShowSQL {
-		engine.ShowSQL(true)
-	}
+	engine.ShowSQL(cnf.DB.ShowSQL)
 
 	// 是否开启缓存
 	if cnf.DB.Cached != 0 {
@@ -50,17 +50,7 @@ func (Register) Regist() (err error) {
 	}
 
 	db = engine
-	logger.Instance().Info("Init db success")
-
-	err = db.Ping()
-	if err != nil {
-		return
-	}
-
-	// 是否关闭用户管理
-	if cnf.DB.UserManageDisable {
-		return
-	}
+	logger.Instance().Info("init db success")
 
 	// 创建用户相关的表
 	err = createTable(&Adminstrator{})
