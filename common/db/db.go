@@ -7,7 +7,6 @@ import (
 	"github.com/go-xorm/xorm"
 
 	"github.com/gopherty/wings/common/conf"
-	"github.com/gopherty/wings/common/logger"
 )
 
 var db *xorm.Engine
@@ -50,7 +49,6 @@ func (Register) Regist() (err error) {
 	}
 
 	db = engine
-	logger.Instance().Info("init db success")
 
 	// 创建用户相关的表
 	err = createTable(&Adminstrator{})

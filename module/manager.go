@@ -1,11 +1,14 @@
 package module
 
 import (
+	"context"
 	"errors"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 
 	"github.com/gopherty/wings/common/logger"
+	"github.com/gopherty/wings/module/features/user"
 )
 
 // Manager 模块控制器
@@ -16,7 +19,10 @@ type Manager struct {
 
 func (m *Manager) reset(s *grpc.Server) {
 	m.srv = s
-	m.modules = map[string]IModule{}
+
+	m.modules = map[string]IModule{
+		"User": user.User{},
+	}
 }
 
 // default module manager
@@ -28,12 +34,12 @@ var (
 )
 
 // InitManager initialization module manager
-func InitManager(s *grpc.Server) (err error) {
-	if s == nil {
+func InitManager(ctx context.Context, gw *runtime.ServeMux, srv *grpc.Server) (err error) {
+	if srv == nil {
 		return ErrServerNotAllowed
 	}
 	m = new(Manager)
-	m.reset(s)
+	m.reset(srv)
 
 	for _, v := range m.modules {
 		//  internal module init
@@ -41,7 +47,7 @@ func InitManager(s *grpc.Server) (err error) {
 			logger.Instance().Sugar().Errorf(" %s init failed. %v", v.Name(), err)
 			continue
 		}
-		v.Registry(s)
+		v.Registry(ctx, gw, srv)
 	}
 	return
 }

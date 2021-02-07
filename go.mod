@@ -5,8 +5,8 @@ go 1.15
 require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-xorm/xorm v0.7.9
-	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-jsonnet v0.17.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.1.0
 	github.com/json-iterator/go v1.1.10
 	github.com/spf13/cobra v1.1.1
 	go.uber.org/multierr v1.6.0 // indirect

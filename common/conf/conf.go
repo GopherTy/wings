@@ -20,9 +20,10 @@ type Register struct {
 
 // Configuration 配置模块
 type Configuration struct {
-	DB     *DB     `json:"DB" yaml:"DB"  jsonnet:"DB"`
-	Server *Server `json:"Server" yaml:"Server" jsonnet:"Server"`
-	Logger *Logger `json:"Logger" yaml:"Logger" jsonnet:"Logger"`
+	DB            *DB            `json:"DB" yaml:"DB"  jsonnet:"DB"`
+	Server        *Server        `json:"Server" yaml:"Server" jsonnet:"Server"`
+	GatewayServer *GatewayServer `json:"GatewayServer" yaml:"GatewayServer" jsonnet:"GatewayServer"`
+	Logger        *Logger        `json:"Logger" yaml:"Logger" jsonnet:"Logger"`
 }
 
 // DB 数据库配置
@@ -42,7 +43,7 @@ type DB struct {
 	Cached int `json:"Cached" yaml:"Cached" jsonnet:"Cached"`
 }
 
-// Server http服务器相关配置
+// Server grpc server
 type Server struct {
 	Address string `json:"Address" yaml:"Address" jsonnet:"Address"`
 	//证书验证文件
@@ -53,10 +54,17 @@ type Server struct {
 	Release bool `json:"Release" yaml:"Release" jsonnet:"Release"`
 }
 
+// GatewayServer grpc gateway server
+type GatewayServer struct {
+	Address string `json:"Address" yaml:"Address" jsonnet:"Address"`
+}
+
 // Logger 日志配置
 type Logger struct {
 	// 日志等级: debug,info,warn,error,dpanic,panic,fatal
 	Level string `json:"Level" yaml:"Level" jsonnet:"Level"`
+	// 日志时间输出格式
+	TimeFormat string `json:"TimeFormat" yaml:"TimeFormat" jsonnet:"TimeFormat"`
 	// 是否开启开发模式
 	Development bool `json:"Development" yaml:"Development" jsonnet:"Development"`
 	// 日志输出格式

@@ -45,6 +45,12 @@ func (Register) Regist() (err error) {
 		logPath = []string{"stdout"}
 	}
 
+	var encodeTime zapcore.TimeEncoder
+	if cnf.Logger.TimeFormat == "" {
+		encodeTime = zapcore.ISO8601TimeEncoder
+	} else {
+		encodeTime = zapcore.TimeEncoderOfLayout(cnf.Logger.TimeFormat)
+	}
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
@@ -53,7 +59,7 @@ func (Register) Regist() (err error) {
 		MessageKey:     "msg",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.LowercaseLevelEncoder, // 小写编码器
-		EncodeTime:     zapcore.ISO8601TimeEncoder,    // ISO8601 UTC 时间格式
+		EncodeTime:     encodeTime,                    // 默认为 ISO8601 UTC 时间格式
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder, // 短径编码器
 	}
@@ -97,7 +103,6 @@ func (Register) Regist() (err error) {
 	defer zapLogger.Sync()
 
 	instance = zapLogger
-	instance.Info("init logger success")
 	return
 }
 

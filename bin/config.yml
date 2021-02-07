@@ -10,8 +10,11 @@ Server:
   Address: :10000
   CertFile: ""
   KeyFile: ""
+GatewayServer: 
+  Address: :10001
 Logger: 
   Level: debug
   Encoding: console
-  Development: false
+  TimeFormat: "2006-01-02 15:04:05.000"
+  Development: true
   LogsPath: ""

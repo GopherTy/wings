@@ -2,8 +2,15 @@ syntax = "proto3";
 package user;
 option go_package = "user";
 
+import "google/api/annotations.proto";
+
 service UserService {
-    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc Login (LoginRequest) returns (LoginResponse){
+        option (google.api.http) = {
+            post: "/v1/wings/users"
+            body: "*"
+        };
+    }
 }
 
 message LoginRequest {
