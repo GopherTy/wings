@@ -7,13 +7,11 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/gopherty/wings/common/conf"
-	gw "github.com/gopherty/wings/module/pb/user"
 	pb "github.com/gopherty/wings/module/pb/user"
 )
 
 // User grpc feature user
 type User struct {
-	pb.UnimplementedUserServiceServer
 }
 
 // Name module name
@@ -27,9 +25,9 @@ func (User) Init() error {
 }
 
 // Registry regist user module
-func (u User) Registry(ctx context.Context, mux *runtime.ServeMux, srv *grpc.Server) (err error) {
-	pb.RegisterUserServiceServer(srv, u)
+func (User) Registry(ctx context.Context, mux *runtime.ServeMux, srv *grpc.Server) error {
+	pb.RegisterUserServiceServer(srv, userService{})
 
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	return gw.RegisterUserServiceHandlerFromEndpoint(ctx, mux, conf.Instance().Server.Address, opts)
+	return pb.RegisterUserServiceHandlerFromEndpoint(ctx, mux, conf.Instance().Server.Address, opts)
 }

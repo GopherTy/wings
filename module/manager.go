@@ -3,29 +3,15 @@ package module
 import (
 	"context"
 	"errors"
+	"sync"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 
-	"github.com/gopherty/wings/common/logger"
 	"github.com/gopherty/wings/module/features/user"
 )
 
-// Manager 模块控制器
-type Manager struct {
-	srv     *grpc.Server
-	modules map[string]IModule
-}
-
-func (m *Manager) reset(s *grpc.Server) {
-	m.srv = s
-
-	m.modules = map[string]IModule{
-		"User": user.User{},
-	}
-}
-
-// default module manager
+// module manager
 var m *Manager
 
 // some default error
@@ -33,21 +19,57 @@ var (
 	ErrServerNotAllowed = errors.New("grpc server is nil")
 )
 
-// InitManager initialization module manager
-func InitManager(ctx context.Context, gw *runtime.ServeMux, srv *grpc.Server) (err error) {
-	if srv == nil {
+// Manager 服务模块控制器
+type Manager struct {
+	srv *grpc.Server
+	mux *runtime.ServeMux
+	ctx context.Context
+
+	mu      sync.Mutex
+	modules map[string]IModule
+}
+
+// Enable enable module
+func (m *Manager) Enable(module IModule) (err error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.modules == nil {
+		m.modules = make(map[string]IModule)
+	}
+
+	err = module.Init()
+	if err != nil {
+		return
+	}
+	err = module.Registry(m.ctx, m.mux, m.srv)
+	if err != nil {
+		return
+	}
+
+	name := module.Name()
+	m.modules[name] = module
+	return
+}
+
+func (m *Manager) reset(ctx context.Context, srv *grpc.Server, mux *runtime.ServeMux) {
+	m.ctx = ctx
+	m.srv = srv
+	m.mux = mux
+}
+
+// Init initialization module manager
+func Init(ctx context.Context, mux *runtime.ServeMux, srv *grpc.Server) error {
+	if srv == nil || mux == nil {
 		return ErrServerNotAllowed
 	}
 	m = new(Manager)
-	m.reset(srv)
+	m.reset(ctx, srv, mux)
 
-	for _, v := range m.modules {
-		//  internal module init
-		if err = v.Init(); err != nil {
-			logger.Instance().Sugar().Errorf(" %s init failed. %v", v.Name(), err)
-			continue
-		}
-		v.Registry(ctx, gw, srv)
-	}
-	return
+	return m.Enable(user.User{})
+}
+
+// Instance retrun module  manager
+func Instance() *Manager {
+	return m
 }

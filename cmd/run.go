@@ -34,8 +34,8 @@ var runCmd = &cobra.Command{
 			}
 		}
 
-		// run grpc gateway server
-		if err := runGateway(); err != nil {
+		// start service
+		if err := serve(); err != nil {
 			logger.Instance().Sugar().Fatalf("server serve failed. %s %v %s\n", red, err, reset)
 		}
 	},
@@ -50,21 +50,24 @@ func runServer(ctx context.Context, gw *runtime.ServeMux) (err error) {
 	l, err := net.Listen("tcp", conf.Instance().Server.Address)
 	if err != nil {
 		logger.Instance().Sugar().Fatalf("server listen failed. %s %v %s \n", red, err, reset)
+		return
 	}
+
 	srv := grpc.NewServer()
-	if err = module.InitManager(ctx, gw, srv); err != nil {
+	if err = module.Init(ctx, gw, srv); err != nil {
 		logger.Instance().Sugar().Fatalf("init grpc module manager failed. %s %v  %s\n", red, err, reset)
+		return
 	}
+
 	logger.Instance().Sugar().Infof("grpc server running in %s", conf.Instance().Server.Address)
 	if err := srv.Serve(l); err != nil {
-		logger.Instance().Sugar().Fatalf("server serve failed. %s %v %s\n", red, err, reset)
+		logger.Instance().Sugar().Fatalf("grpc server serve failed. %s %v %s\n", red, err, reset)
 	}
 	return
 }
 
-func runGateway() (err error) {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+func serve() (err error) {
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	mux := runtime.NewServeMux()
