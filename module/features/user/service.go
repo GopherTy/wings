@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/gopherty/wings/module/pb/user"
+	pb "github.com/gopherty/wings/pb/user"
 )
 
 type userService struct {

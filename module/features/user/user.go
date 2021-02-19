@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/gopherty/wings/common/conf"
-	pb "github.com/gopherty/wings/module/pb/user"
+	pb "github.com/gopherty/wings/pb/user"
 )
 
 // User grpc feature user

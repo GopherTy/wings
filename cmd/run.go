@@ -53,7 +53,10 @@ func runServer(ctx context.Context, gw *runtime.ServeMux) (err error) {
 		return
 	}
 
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(grpc.UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		logger.Instance().Sugar().Infof("%s"+info.FullMethod+"%s", green, reset)
+		return handler(ctx, req)
+	}))
 	if err = module.Init(ctx, gw, srv); err != nil {
 		logger.Instance().Sugar().Fatalf("init grpc module manager failed. %s %v  %s\n", red, err, reset)
 		return
