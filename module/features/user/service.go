@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/gopherty/wings/pb/user"
+	"github.com/gopherty/wings/pkg/token"
 )
 
 type userService struct {
@@ -20,9 +21,13 @@ func (userService) Login(ctx context.Context, req *pb.LoginRequest) (resp *pb.Lo
 		return
 	}
 
+	t, err := token.New(1)
+	if err != nil {
+		return
+	}
 	resp = &pb.LoginResponse{
-		AccessToken:  req.GetUser(),
-		RefreshToken: req.GetPassword(),
+		AccessToken:  t.Access,
+		RefreshToken: t.Refresh,
 	}
 	return
 }

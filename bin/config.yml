@@ -12,6 +12,9 @@ Server:
   KeyFile: ""
 GatewayServer: 
   Address: :10001
+Secret: 
+  Access: wings15
+  Refresh: wings247
 Logger: 
   Level: debug
   Encoding: console

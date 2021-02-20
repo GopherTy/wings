@@ -24,6 +24,7 @@ type Configuration struct {
 	Server        *Server        `json:"Server" yaml:"Server" jsonnet:"Server"`
 	GatewayServer *GatewayServer `json:"GatewayServer" yaml:"GatewayServer" jsonnet:"GatewayServer"`
 	Logger        *Logger        `json:"Logger" yaml:"Logger" jsonnet:"Logger"`
+	Secret        *Secret        `json:"Secret" yaml:"Secret" jsonnet:"Secret"`
 }
 
 // DB 数据库配置
@@ -71,6 +72,12 @@ type Logger struct {
 	Encoding string `json:"Encoding" yaml:"Encoding" jsonnet:"Encoding"`
 	// 日志文件输出位置
 	LogsPath string `json:"LogsPath" yaml:"LogsPath" jsonnet:"LogsPath"`
+}
+
+// Secret JWT 密钥
+type Secret struct {
+	Access  string `json:"Access"  yaml:"Access" jsonnet:"Access"`
+	Refresh string `json:"Refresh"  yaml:"Refresh" jsonnet:"Refresh"`
 }
 
 // Name .

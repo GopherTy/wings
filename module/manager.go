@@ -17,6 +17,7 @@ var m *Manager
 // some default error
 var (
 	ErrServerNotAllowed = errors.New("grpc server is nil")
+	ErrModuleExists     = errors.New("module has exists")
 )
 
 // Manager 服务模块控制器
@@ -24,6 +25,8 @@ type Manager struct {
 	srv *grpc.Server
 	mux *runtime.ServeMux
 	ctx context.Context
+
+	interceptor Interceptor
 
 	mu      sync.Mutex
 	modules map[string]IModule
@@ -38,6 +41,12 @@ func (m *Manager) Enable(module IModule) (err error) {
 		m.modules = make(map[string]IModule)
 	}
 
+	name := module.Name()
+	if _, ok := m.modules[name]; ok {
+		err = ErrModuleExists
+		return
+	}
+
 	err = module.Init()
 	if err != nil {
 		return
@@ -47,7 +56,6 @@ func (m *Manager) Enable(module IModule) (err error) {
 		return
 	}
 
-	name := module.Name()
 	m.modules[name] = module
 	return
 }
