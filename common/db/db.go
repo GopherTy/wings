@@ -1,6 +1,8 @@
 package db
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"errors"
 
 	_ "github.com/go-sql-driver/mysql" // 模块注册导入数据库驱动
@@ -51,12 +53,36 @@ func (Register) Regist() (err error) {
 	db = engine
 
 	// 创建用户相关的表
-	err = createTable(&Adminstrator{})
+	err = createTable(&Administrator{})
 	if err != nil {
 		return
 	}
 	// 同步表结构
-	return db.Sync2(&Adminstrator{})
+	db.Sync2(&Administrator{})
+
+	// generate administrator
+	ok, err := db.Get(&Administrator{
+		User: cnf.User.Name,
+	})
+	if err != nil {
+		return
+	}
+	if ok {
+		return
+	}
+
+	var passwd string
+	h := sha512.New()
+	_, err = h.Write([]byte(cnf.User.Passwd))
+	if err != nil {
+		return
+	}
+	passwd = hex.EncodeToString(h.Sum(nil))[:18]
+	_, err = db.InsertOne(&Administrator{
+		User:     cnf.User.Name,
+		Password: passwd,
+	})
+	return
 }
 
 func createTable(beans ...interface{}) (err error) {

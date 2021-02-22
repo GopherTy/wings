@@ -2,7 +2,7 @@
 DB:
   Driver: mysql
   Source: ty:123@tcp(localhost:3306)/gopherty?charset=utf8
-  # ShowSQL: true
+  ShowSQL: true
   MaxOpenConns: 100
   MaxIdleConns: 3
   Cached: 200
@@ -12,6 +12,9 @@ Server:
   KeyFile: ""
 GatewayServer: 
   Address: :10001
+User: 
+  Name: ty
+  Passwd: wings369
 Secret: 
   Access: wings15
   Refresh: wings247

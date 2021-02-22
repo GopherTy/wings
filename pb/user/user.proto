@@ -20,4 +20,6 @@ message LoginRequest {
 message LoginResponse {
     string access_token = 1;
     string refresh_token = 2;
+    string last_ip = 3;  // last login ip
+    string last_time = 4; // last login time 
 }
