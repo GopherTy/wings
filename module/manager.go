@@ -8,6 +8,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 
+	"github.com/gopherty/wings/module/features/hello"
 	"github.com/gopherty/wings/module/features/user"
 )
 
@@ -73,7 +74,10 @@ func Init(ctx context.Context, mux *runtime.ServeMux, srv *grpc.Server) error {
 	}
 	m = new(Manager)
 	m.reset(ctx, srv, mux)
-
+	err := m.Enable(hello.Hello{})
+	if err != nil {
+		return err
+	}
 	return m.Enable(user.User{})
 }
 
