@@ -20,12 +20,12 @@ type Register struct {
 
 // Configuration 配置模块
 type Configuration struct {
-	DB            *DB            `json:"DB" yaml:"DB"  jsonnet:"DB"`
-	Server        *Server        `json:"Server" yaml:"Server" jsonnet:"Server"`
-	GatewayServer *GatewayServer `json:"GatewayServer" yaml:"GatewayServer" jsonnet:"GatewayServer"`
-	Logger        *Logger        `json:"Logger" yaml:"Logger" jsonnet:"Logger"`
-	User          *User          `json:"User" yaml:"User" jsonnet:"User"`
-	Secret        *Secret        `json:"Secret" yaml:"Secret" jsonnet:"Secret"`
+	DB      *DB      `json:"DB" yaml:"DB"  jsonnet:"DB"`
+	Server  *Server  `json:"Server" yaml:"Server" jsonnet:"Server"`
+	Gateway *Gateway `json:"GatewayServer" yaml:"GatewayServer" jsonnet:"GatewayServer"`
+	Logger  *Logger  `json:"Logger" yaml:"Logger" jsonnet:"Logger"`
+	User    *User    `json:"User" yaml:"User" jsonnet:"User"`
+	Secret  *Secret  `json:"Secret" yaml:"Secret" jsonnet:"Secret"`
 }
 
 // DB 数据库配置
@@ -56,9 +56,12 @@ type Server struct {
 	Release bool `json:"Release" yaml:"Release" jsonnet:"Release"`
 }
 
-// GatewayServer grpc gateway server
-type GatewayServer struct {
-	Address string `json:"Address" yaml:"Address" jsonnet:"Address"`
+// Gateway grpc gateway
+type Gateway struct {
+	Address  string `json:"Address" yaml:"Address" jsonnet:"Address"`
+	H2       bool   `json:"H2" yaml:"H2" jsonnet:"H2"`
+	CertFile string `json:"CertFile" yaml:"CertFile" jsonnet:"CertFile"`
+	KeyFile  string `json:"KeyFile" yaml:"KeyFile" jsonnet:"KeyFile"`
 }
 
 // Logger 日志配置
