@@ -65,7 +65,7 @@ func VerifyToken(ctx context.Context, keyFunc jwt.Keyfunc) (token *jwt.Token, er
 
 // ExtractToken extract token from context
 func ExtractToken(ctx context.Context) (string, error) {
-	md, ok := metadata.FromOutgoingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return "", errMissingMetadata
 	}

@@ -8,7 +8,6 @@ import (
 
 	"github.com/gopherty/wings/common/conf"
 	pb "github.com/gopherty/wings/pb/hello"
-	"github.com/gopherty/wings/pkg/token"
 )
 
 // Hello .
@@ -26,19 +25,14 @@ func (Hello) Init() error {
 }
 
 // Registry registry hello module
-func (Hello) Registry(ctx context.Context, mux *runtime.ServeMux, srv *grpc.Server) error {
+func (Hello) RegisterServer(srv *grpc.Server) {
 	pb.RegisterHelloServiceServer(srv, &helloService{})
+}
 
+func (Hello) RegisterHandler(mux *runtime.ServeMux) error {
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-			err := token.ValidToken(ctx, token.AccessKeyFunc)
-			if err != nil {
-				return err
-			}
-			return invoker(ctx, method, req, reply, cc, opts...)
-		}),
 	}
 
-	return pb.RegisterHelloServiceHandlerFromEndpoint(ctx, mux, conf.Instance().Server.Address, opts)
+	return pb.RegisterHelloServiceHandlerFromEndpoint(context.Background(), mux, conf.Instance().Server.Address, opts)
 }

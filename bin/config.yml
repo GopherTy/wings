@@ -7,11 +7,11 @@ DB:
   MaxIdleConns: 3
   Cached: 200
 Server:
-  Address: :10000
+  Address: :10002
   CertFile: ""
   KeyFile: ""
-#GatewayServer: 
-#  Address: :10001
+GatewayServer: 
+ Address: :10001
 User: 
   Name: ty
   Passwd: wings369

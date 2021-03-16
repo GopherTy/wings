@@ -1,7 +1,6 @@
 package module
 
 import (
-	"context"
 	"errors"
 	"sync"
 
@@ -25,7 +24,6 @@ var (
 type Manager struct {
 	srv *grpc.Server
 	mux *runtime.ServeMux
-	ctx context.Context
 
 	interceptor Interceptor
 
@@ -33,8 +31,7 @@ type Manager struct {
 	modules map[string]IModule
 }
 
-// Enable enable module
-func (m *Manager) Enable(module IModule) (err error) {
+func (m *Manager) enable(modules ...IModule) (err error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -42,43 +39,43 @@ func (m *Manager) Enable(module IModule) (err error) {
 		m.modules = make(map[string]IModule)
 	}
 
-	name := module.Name()
-	if _, ok := m.modules[name]; ok {
-		err = ErrModuleExists
-		return
+	for _, module := range modules {
+		name := module.Name()
+		if _, ok := m.modules[name]; ok {
+			err = ErrModuleExists
+			return
+		}
+
+		err = module.Init()
+		if err != nil {
+			return
+		}
+		module.RegisterServer(m.srv)
+
+		if m.mux != nil {
+			err = module.RegisterHandler(m.mux)
+			if err != nil {
+				return
+			}
+		}
+
+		m.modules[name] = module
 	}
 
-	err = module.Init()
-	if err != nil {
-		return
-	}
-	err = module.Registry(m.ctx, m.mux, m.srv)
-	if err != nil {
-		return
-	}
-
-	m.modules[name] = module
 	return
 }
 
-func (m *Manager) reset(ctx context.Context, srv *grpc.Server, mux *runtime.ServeMux) {
-	m.ctx = ctx
-	m.srv = srv
-	m.mux = mux
-}
-
 // Init initialization module manager
-func Init(ctx context.Context, mux *runtime.ServeMux, srv *grpc.Server) error {
-	if srv == nil || mux == nil {
+func Init(srv *grpc.Server, mux *runtime.ServeMux) (err error) {
+	if srv == nil {
 		return ErrServerNotAllowed
 	}
 	m = new(Manager)
-	m.reset(ctx, srv, mux)
-	err := m.Enable(hello.Hello{})
-	if err != nil {
-		return err
-	}
-	return m.Enable(user.User{})
+	m.srv = srv
+	m.mux = mux
+
+	// register grpc service server
+	return m.enable(hello.Hello{}, user.User{})
 }
 
 // Instance retrun module  manager

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
 	"net"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
 
 	"github.com/gopherty/wings/common"
@@ -20,6 +22,7 @@ import (
 	"github.com/gopherty/wings/common/logger"
 	"github.com/gopherty/wings/module"
 	"github.com/gopherty/wings/pkg/colors"
+	"github.com/gopherty/wings/pkg/token"
 )
 
 var runCmd = &cobra.Command{
@@ -46,85 +49,18 @@ var runCmd = &cobra.Command{
 		}
 		srv := newServer()
 
+		err = module.Init(srv.s, srv.gateway)
+		if err != nil {
+			logger.Instance().Sugar().Fatalf("init moudle failed %v", err)
+		}
+
 		logger.Instance().Sugar().Infof("server work on %s", addr)
 		srv.serve(l)
-
-		// start service
-		// if err := serve(); err != nil {
-		// 	logger.Instance().Sugar().Fatalf("server serve failed. %s %v %s\n", red, err, reset)
-		// }
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-}
-
-func runServer(ctx context.Context, gw *runtime.ServeMux) (err error) {
-	// run grpc serve
-	l, err := net.Listen("tcp", conf.Instance().Server.Address)
-	if err != nil {
-		logger.Instance().Sugar().Fatalf("server listen failed. %s %v %s \n", red, err, reset)
-		return
-	}
-
-	// add
-	var opts []grpc.ServerOption
-	opts = append(opts, grpc.UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-		at := time.Now()
-		var addr string
-		if p, ok := peer.FromContext(ctx); ok {
-			addr = p.Addr.String()
-		} else {
-			addr = "unknown address"
-		}
-		resp, err = handler(ctx, req)
-		if err == nil {
-			logger.Instance().Sugar().Infof(" %s | %s %s %s | %v ", addr, "\033[97;42m", info.FullMethod, "\033[0m", time.Since(at))
-		} else {
-			logger.Instance().Sugar().Errorf(" %s | %s %s %s | %v  {%v}", addr, "\033[97;41m", info.FullMethod, "\033[0m", time.Since(at), err)
-		}
-		return
-	}))
-	opts = append(opts, grpc.StreamInterceptor(func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		at := time.Now()
-		var addr string
-		ctx := ss.Context()
-		if p, ok := peer.FromContext(ctx); ok {
-			addr = p.Addr.String()
-		} else {
-			addr = "unknown address"
-		}
-		err = handler(srv, ss)
-		if err == nil {
-			logger.Instance().Sugar().Infof(" %s | %s %s %s | %v ", addr, "\033[97;42m", info.FullMethod, "\033[0m", time.Since(at))
-		} else {
-			logger.Instance().Sugar().Errorf(" %s | %s %s %s | %v  {%v}", addr, "\033[97;41m", info.FullMethod, "\033[0m", time.Since(at), err)
-		}
-		return err
-	}))
-	srv := grpc.NewServer(opts...)
-	if err = module.Init(ctx, gw, srv); err != nil {
-		logger.Instance().Sugar().Fatalf("init grpc module manager failed. %s %v  %s\n", red, err, reset)
-		return
-	}
-
-	logger.Instance().Sugar().Infof("grpc server running in %s", conf.Instance().Server.Address)
-	if err := srv.Serve(l); err != nil {
-		logger.Instance().Sugar().Fatalf("grpc server serve failed. %s %v %s\n", red, err, reset)
-	}
-	return
-}
-
-func serve() (err error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	mux := runtime.NewServeMux()
-	go runServer(ctx, mux)
-
-	logger.Instance().Sugar().Infof("grpc gateway server running in %s", conf.Instance().Gateway.Address)
-	return http.ListenAndServe(conf.Instance().Gateway.Address, mux)
 }
 
 // wings server
@@ -173,9 +109,18 @@ func newServer() *server {
 
 	// server dev mode add request logs interceptor
 	opts := []grpc.ServerOption{
-		grpc.UnaryInterceptor(logsUnaryInterceptor),
-		grpc.StreamInterceptor(logsStreamInterceptor),
+		grpc.UnaryInterceptor(unaryInterceptor),
+		grpc.StreamInterceptor(streamInterceptor),
 	}
+
+	if conf.Instance().Server.CertFile != "" && conf.Instance().Server.KeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(conf.Instance().Server.CertFile, conf.Instance().Server.KeyFile)
+		if err != nil {
+			panic(err)
+		}
+		opts = append(opts, grpc.Creds(credentials.NewServerTLSFromCert(&cert)))
+	}
+
 	srv.s = grpc.NewServer(opts...)
 
 	if conf.Instance().Gateway != nil {
@@ -186,7 +131,7 @@ func newServer() *server {
 	return srv
 }
 
-func logsUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	at := time.Now()
 	var addr string
 	if p, ok := peer.FromContext(ctx); ok {
@@ -194,6 +139,19 @@ func logsUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	} else {
 		addr = "TODO"
 	}
+
+	if info.FullMethod != "/user.UserService/Login" {
+		err = token.ValidToken(ctx, token.AccessKeyFunc)
+		if err != nil {
+			if conf.Instance().Logger.LogsPath != "" { // logs file
+				logger.Instance().Sugar().Errorf(" %s | %s | %v  {%v}", addr, info.FullMethod, time.Since(at), err)
+			} else { // stdout
+				logger.Instance().Sugar().Errorf(" %s | %s %s %s | %v  {%v}", addr, colors.Red, info.FullMethod, colors.Reset, time.Since(at), err)
+			}
+			return
+		}
+	}
+
 	resp, err = handler(ctx, req)
 	if err != nil {
 		if conf.Instance().Logger.LogsPath != "" { // logs file
@@ -212,7 +170,7 @@ func logsUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	return
 }
 
-func logsStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+func streamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	at := time.Now()
 	var addr string
 	ctx := ss.Context()
@@ -221,7 +179,17 @@ func logsStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.Str
 	} else {
 		addr = "TODO"
 	}
-	err := handler(srv, ss)
+
+	err := token.ValidToken(ctx, token.AccessKeyFunc)
+	if err != nil {
+		if conf.Instance().Logger.LogsPath != "" { // logs file
+			logger.Instance().Sugar().Errorf(" %s | %s | %v  {%v}", addr, info.FullMethod, time.Since(at), err)
+		} else { // stdout
+			logger.Instance().Sugar().Errorf(" %s | %s %s %s | %v  {%v}", addr, colors.Red, info.FullMethod, colors.Reset, time.Since(at), err)
+		}
+		return err
+	}
+	err = handler(srv, ss)
 	if err != nil {
 		if conf.Instance().Logger.LogsPath != "" { // logs file
 			logger.Instance().Sugar().Errorf(" %s | %s | %v  {%v}", addr, info.FullMethod, time.Since(at), err)

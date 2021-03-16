@@ -1,15 +1,14 @@
 package module
 
 import (
-	"context"
-
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 
 // IModule 模块接口
 type IModule interface {
-	Name() string
 	Init() error
-	Registry(context.Context, *runtime.ServeMux, *grpc.Server) error
+	Name() string
+	RegisterServer(*grpc.Server)             // grpc server register
+	RegisterHandler(*runtime.ServeMux) error // grpc gateway handler register
 }

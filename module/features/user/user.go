@@ -25,9 +25,13 @@ func (User) Init() error {
 }
 
 // Registry regist user module
-func (User) Registry(ctx context.Context, mux *runtime.ServeMux, srv *grpc.Server) error {
+func (User) RegisterServer(srv *grpc.Server) {
 	pb.RegisterUserServiceServer(srv, userService{})
+}
 
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-	return pb.RegisterUserServiceHandlerFromEndpoint(ctx, mux, conf.Instance().Server.Address, opts)
+func (User) RegisterHandler(mux *runtime.ServeMux) error {
+	opts := []grpc.DialOption{
+		grpc.WithInsecure(),
+	}
+	return pb.RegisterUserServiceHandlerFromEndpoint(context.Background(), mux, conf.Instance().Server.Address, opts)
 }
