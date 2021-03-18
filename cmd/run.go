@@ -38,7 +38,7 @@ var runCmd = &cobra.Command{
 		}
 		for _, reg := range registers {
 			if err := reg.Regist(); err != nil {
-				log.Fatalf("%s register failed. %s %v %s\n", reg.Name(), red, err, reset)
+				log.Fatalf("%s register failed. %s %v %s\n", reg.Name(), colors.Red, err, colors.Reset)
 			}
 		}
 
@@ -55,7 +55,9 @@ var runCmd = &cobra.Command{
 		}
 
 		logger.Instance().Sugar().Infof("server work on %s", addr)
-		srv.serve(l)
+		if err = srv.serve(l); err != nil {
+			logger.Instance().Sugar().Fatalf("serve failed. %v", err)
+		}
 	},
 }
 
@@ -80,23 +82,28 @@ func (srv *server) serve(l net.Listener) error {
 		go func() {
 			cnf := conf.Instance().Gateway
 			var err error
-			defer logger.Instance().Sugar().Errorf("failed to listen and serve. {%v}", err)
 
 			if cnf.H2 {
 				if cnf.CertFile != "" && cnf.KeyFile != "" {
 					logger.Instance().Sugar().Infof("h2 work on %s", cnf.Address)
 
-					err = http.ListenAndServeTLS(cnf.Address, cnf.CertFile, cnf.KeyFile, srv.gateway)
+					if err = http.ListenAndServeTLS(cnf.Address, cnf.CertFile, cnf.KeyFile, srv.gateway); err != nil {
+						logger.Instance().Sugar().Errorf("failed to listen and serve. {%v}", err)
+					}
 				} else {
 					logger.Instance().Sugar().Infof("h2c work on %s", cnf.Address)
 
 					handler := h2c.NewHandler(srv.gateway, &http2.Server{})
-					err = http.ListenAndServe(cnf.Address, handler)
+					if err = http.ListenAndServe(cnf.Address, handler); err != nil {
+						logger.Instance().Sugar().Errorf("failed to listen and serve. {%v}", err)
+					}
 				}
 			} else {
 				logger.Instance().Sugar().Infof("http work on %s", cnf.Address)
 
-				err = http.ListenAndServe(cnf.Address, srv.gateway)
+				if err = http.ListenAndServe(cnf.Address, srv.gateway); err != nil {
+					logger.Instance().Sugar().Errorf("failed to listen and serve. {%v}", err)
+				}
 			}
 		}()
 	}

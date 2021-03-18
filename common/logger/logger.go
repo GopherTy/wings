@@ -100,7 +100,9 @@ func (Register) Regist() (err error) {
 	if err != nil {
 		return
 	}
-	defer zapLogger.Sync()
+	defer func() {
+		err = zapLogger.Sync()
+	}()
 
 	instance = zapLogger
 	return

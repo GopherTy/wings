@@ -144,7 +144,7 @@ func (c *Configuration) loader(path string) (b []byte, err error) {
 		vm := jsonnet.MakeVM()
 		var jsonStr string
 		var json = jsoniter.ConfigCompatibleWithStandardLibrary
-		jsonStr, err = vm.EvaluateSnippet(path, string(b))
+		jsonStr, err = vm.EvaluateAnonymousSnippet(path, string(b))
 		if err != nil {
 			return
 		}

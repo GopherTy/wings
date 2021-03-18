@@ -58,7 +58,10 @@ func (Register) Regist() (err error) {
 		return
 	}
 	// 同步表结构
-	db.Sync2(&Administrator{})
+	err = db.Sync2(&Administrator{})
+	if err != nil {
+		return
+	}
 
 	// generate administrator
 	ok, err := db.Get(&Administrator{

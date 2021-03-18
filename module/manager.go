@@ -25,7 +25,7 @@ type Manager struct {
 	srv *grpc.Server
 	mux *runtime.ServeMux
 
-	interceptor Interceptor
+	// interceptor Interceptor
 
 	mu      sync.Mutex
 	modules map[string]IModule

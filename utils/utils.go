@@ -11,10 +11,7 @@ import (
 func IsFileOrDirExists(src string) bool {
 	_, err := os.Stat(src)
 	if err != nil {
-		if os.IsExist(err) {
-			return true
-		}
-		return false
+		return os.IsExist(err)
 	}
 
 	return true
