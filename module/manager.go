@@ -65,6 +65,41 @@ func (m *Manager) enable(modules ...IModule) (err error) {
 	return
 }
 
+// Enable enable module
+func (m *Manager) Enable(modules ...IModule) (err error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.modules == nil {
+		m.modules = make(map[string]IModule)
+	}
+
+	for _, module := range modules {
+		name := module.Name()
+		if _, ok := m.modules[name]; ok {
+			err = ErrModuleExists
+			return
+		}
+
+		err = module.Init()
+		if err != nil {
+			return
+		}
+		module.RegisterServer(m.srv)
+
+		if m.mux != nil {
+			err = module.RegisterHandler(m.mux)
+			if err != nil {
+				return
+			}
+		}
+
+		m.modules[name] = module
+	}
+
+	return
+}
+
 // Init initialization module manager
 func Init(srv *grpc.Server, mux *runtime.ServeMux) (err error) {
 	if srv == nil {
@@ -81,4 +116,16 @@ func Init(srv *grpc.Server, mux *runtime.ServeMux) (err error) {
 // Instance retrun module  manager
 func Instance() *Manager {
 	return m
+}
+
+// NewManager module manager. If grpc gateway not implementation,should be nil
+func NewManager(srv *grpc.Server, mux *runtime.ServeMux) (*Manager, error) {
+	if srv == nil {
+		return nil, ErrServerNotAllowed
+	}
+	return &Manager{
+		srv: srv,
+		mu:  sync.Mutex{},
+		mux: mux,
+	}, nil
 }

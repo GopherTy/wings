@@ -21,6 +21,8 @@ import (
 	"github.com/gopherty/wings/common/db"
 	"github.com/gopherty/wings/common/logger"
 	"github.com/gopherty/wings/module"
+	"github.com/gopherty/wings/module/features/hello"
+	"github.com/gopherty/wings/module/features/user"
 	"github.com/gopherty/wings/pkg/colors"
 	"github.com/gopherty/wings/pkg/token"
 )
@@ -48,10 +50,12 @@ var runCmd = &cobra.Command{
 			logger.Instance().Sugar().Fatalf("failed to listen %s. %v", addr, err)
 		}
 		srv := newServer()
-
-		err = module.Init(srv.s, srv.gateway)
+		m, err := module.NewManager(srv.s, srv.gateway)
 		if err != nil {
-			logger.Instance().Sugar().Fatalf("init moudle failed %v", err)
+			logger.Instance().Sugar().Fatalf("generate manager failed %v", err)
+		}
+		if err = m.Enable(user.User{}, hello.Hello{}); err != nil {
+			logger.Instance().Sugar().Fatalf("enable moudle failed %v", err)
 		}
 
 		logger.Instance().Sugar().Infof("server work on %s", addr)
