@@ -123,9 +123,10 @@ func NewManager(srv *grpc.Server, mux *runtime.ServeMux) (*Manager, error) {
 	if srv == nil {
 		return nil, ErrServerNotAllowed
 	}
+
 	return &Manager{
-		srv: srv,
-		mu:  sync.Mutex{},
-		mux: mux,
+		srv:     srv,
+		mux:     mux,
+		modules: make(map[string]IModule),
 	}, nil
 }

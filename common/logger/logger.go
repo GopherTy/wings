@@ -100,13 +100,6 @@ func (Register) Regist() (err error) {
 	if err != nil {
 		return
 	}
-	// defer func() {
-	// 	err = zapLogger.Sync()
-	// 	_, ok := err.(*os.PathError)
-	// 	if err != nil && ok {
-	// 		err = nil
-	// 	}
-	// }()
 
 	instance = zapLogger
 	return
