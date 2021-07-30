@@ -24,7 +24,7 @@ func (Hello) Init() error {
 	return nil
 }
 
-// Registry registry hello module
+// RegisterServer registry hello module
 func (Hello) RegisterServer(srv *grpc.Server) {
 	pb.RegisterHelloServiceServer(srv, &helloService{})
 }

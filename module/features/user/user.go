@@ -24,7 +24,7 @@ func (User) Init() error {
 	return nil
 }
 
-// Registry regist user module
+// RegisterServer register user module
 func (User) RegisterServer(srv *grpc.Server) {
 	pb.RegisterUserServiceServer(srv, userService{})
 }

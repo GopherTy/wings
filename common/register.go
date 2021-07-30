@@ -1,7 +1,7 @@
 package common
 
-// IRegister common module regist interface
+// IRegister common module register interface
 type IRegister interface {
 	Name() string
-	Regist() error
+	CheckIn() error
 }

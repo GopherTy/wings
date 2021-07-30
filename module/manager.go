@@ -113,7 +113,7 @@ func Init(srv *grpc.Server, mux *runtime.ServeMux) (err error) {
 	return m.enable(hello.Hello{}, user.User{})
 }
 
-// Instance retrun module  manager
+// Instance return module  manager
 func Instance() *Manager {
 	return m
 }

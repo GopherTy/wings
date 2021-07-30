@@ -39,7 +39,7 @@ var runCmd = &cobra.Command{
 			db.Register{},
 		}
 		for _, reg := range registers {
-			if err := reg.Regist(); err != nil {
+			if err := reg.CheckIn(); err != nil {
 				log.Fatalf("%s register failed. %s %v %s\n", reg.Name(), colors.Red, err, colors.Reset)
 			}
 		}
@@ -73,7 +73,9 @@ func init() {
 type server struct {
 	s *grpc.Server
 
-	gateway *runtime.ServeMux // grpc gateway, it reads a gRPC service definition and generates a reverse-proxy server which translates a RESTful JSON API into gRPC
+	// grpc gateway, it reads a gRPC service definition and generates a reverse-proxy server which
+	// translates a RECheckInSTful JSON API into gRPC
+	gateway *runtime.ServeMux
 }
 
 func (srv *server) serve(l net.Listener) error {

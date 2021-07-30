@@ -16,3 +16,6 @@
 
 # Project 
 wings*
+
+# Editor config file
+.idea

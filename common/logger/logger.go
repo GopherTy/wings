@@ -22,8 +22,8 @@ func (Register) Name() string {
 	return "Common.Logger"
 }
 
-// Regist 实现 IRegister 接口，以注册获取初始化好的 logger 对象。
-func (Register) Regist() (err error) {
+// CheckIn 实现 IRegister 接口，以注册获取初始化好的 logger 对象。
+func (Register) CheckIn() (err error) {
 	cnf := conf.Instance()
 
 	// 是否输出日志文件

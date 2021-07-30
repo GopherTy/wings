@@ -48,7 +48,7 @@ type DB struct {
 // Server grpc server
 type Server struct {
 	Address string `json:"Address" yaml:"Address" jsonnet:"Address"`
-	//证书验证文件
+	// 证书验证文件
 	CertFile string `json:"CertFile" yaml:"CertFile" jsonnet:"CertFile"`
 	// 证书
 	KeyFile string `json:"KeyFile" yaml:"KeyFile" jsonnet:"KeyFile"`
@@ -95,18 +95,20 @@ func (Register) Name() string {
 	return "Common.Configuration"
 }
 
-// Regist 注册配置模块
-func (Register) Regist() (err error) {
+// CheckIn 注册配置模块
+func (Register) CheckIn() (err error) {
 	instance = &Configuration{}
 	path, err := utils.BasePath()
 	if err != nil {
 		return
 	}
+
 	path = filepath.Join(path, "config.yml")
 	_, err = instance.loader(path)
 	if err != nil {
 		return
 	}
+
 	if instance == nil {
 		err = errors.New("configuration load failed")
 	}
